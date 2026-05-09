@@ -130,15 +130,31 @@
             { id: 52, fr: "Fille", es: "Hija", emoji: "👧", cat: "famille" },
             { id: 53, fr: "Parents", es: "Padres", emoji: "👪", cat: "famille" },
             { id: 54, fr: "Bébé", es: "Bebé", emoji: "👶", cat: "famille" },
-            { id: 55, fr: "Famille", es: "Familia", emoji: "👪", cat: "famille" }
+            { id: 55, fr: "Famille", es: "Familia", emoji: "👪", cat: "famille" },
+            { id: 56, fr: "Voiture", es: "Coche", emoji: "🚗", cat: "transport" },
+            { id: 57, fr: "Bus", es: "Autobús", emoji: "🚌", cat: "transport" },
+            { id: 58, fr: "Train", es: "Tren", emoji: "🚆", cat: "transport" },
+            { id: 59, fr: "Avion", es: "Avión", emoji: "✈️", cat: "transport" },
+            { id: 60, fr: "Bateau", es: "Barco", emoji: "🚢", cat: "transport" },
+            { id: 61, fr: "Vélo", es: "Bicicleta", emoji: "🚲", cat: "transport" },
+            { id: 62, fr: "Moto", es: "Moto", emoji: "🏍️", cat: "transport" },
+            { id: 63, fr: "Camion", es: "Camión", emoji: "🚚", cat: "transport" },
+            { id: 64, fr: "Taxi", es: "Taxi", emoji: "🚕", cat: "transport" },
+            { id: 65, fr: "Métro", es: "Metro", emoji: "🚇", cat: "transport" },
+            { id: 66, fr: "Tramway", es: "Tranvía", emoji: "🚋", cat: "transport" },
+            { id: 67, fr: "Hélicoptère", es: "Helicóptero", emoji: "🚁", cat: "transport" },
+            { id: 68, fr: "Ambulance", es: "Ambulancia", emoji: "🚑", cat: "transport" },
+            { id: 69, fr: "Fusée", es: "Cohete", emoji: "🚀", cat: "transport" },
+            { id: 70, fr: "Trottinette", es: "Patinete", emoji: "🛴", cat: "transport" }
         ];
 
         let stars = 0;
-        let selectedCategories = new Set(['forme', 'animal', 'famille']);
+        let selectedCategories = new Set(['forme', 'animal', 'famille', 'transport']);
         const categoryLabels = {
             forme: { name: 'Formas', emoji: '🔷' },
             animal: { name: 'Animales', emoji: '🐾' },
-            famille: { name: 'Familia', emoji: '👪' }
+            famille: { name: 'Familia', emoji: '👪' },
+            transport: { name: 'Transportes', emoji: '🚗' }
         };
         let gameSession = {
             currentRound: 0,
@@ -289,7 +305,7 @@
                             ${getActiveVocabulary().length} palabras
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                         ${getCategoryOptionsHtml()}
                     </div>
                 </section>
