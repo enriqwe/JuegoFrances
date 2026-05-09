@@ -387,22 +387,37 @@
             });
             container.innerHTML = html + `</div>`;
 
-            let flipped = [], solved = 0;
+            let flipped = [], solved = 0, checkingPair = false;
             window.handleMemoryClick = (idx, id, type, fr) => {
                 const el = document.getElementById(`card-${idx}`);
-                if (el.classList.contains('flipped') || flipped.length >= 2) return;
+                if (!el || checkingPair || el.classList.contains('flipped') || el.classList.contains('matched')) return;
                 el.classList.add('flipped');
                 if (type === 'word') speak(fr);
-                flipped.push({idx, id});
+                flipped.push({ idx, id, type, el });
+
                 if (flipped.length === 2) {
-                    if (flipped[0].id === flipped[1].id) { 
-                        solved++; flipped = []; 
-                        if (solved === items.length) { 
-                            stars += 10; document.getElementById('star-count').innerText = stars; 
-                            showFeedback(true, "¡Bravo!", "Has completado el tablero.", "🥇", showMenu); 
-                        } 
+                    const [first, second] = flipped;
+                    const isPair = first.id === second.id && first.type !== second.type;
+                    checkingPair = true;
+
+                    if (isPair) {
+                        first.el.classList.add('matched');
+                        second.el.classList.add('matched');
+                        solved++;
+                        flipped = [];
+                        checkingPair = false;
+                        if (solved === items.length) {
+                            stars += 10; document.getElementById('star-count').innerText = stars;
+                            showFeedback(true, "¡Bravo!", "Has completado el tablero.", "🥇", showMenu);
+                        }
+                    } else {
+                        setTimeout(() => {
+                            first.el.classList.remove('flipped');
+                            second.el.classList.remove('flipped');
+                            flipped = [];
+                            checkingPair = false;
+                        }, 900);
                     }
-                    else { setTimeout(() => { document.getElementById(`card-${flipped[0].idx}`).classList.remove('flipped'); document.getElementById(`card-${flipped[1].idx}`).classList.remove('flipped'); flipped = []; }, 1000); }
                 }
             };
         }
