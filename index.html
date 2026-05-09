@@ -115,10 +115,31 @@
             { id: 37, fr: "Araignée", es: "Araña", emoji: "🕷️", cat: "animal" },
             { id: 38, fr: "Panda", es: "Panda", emoji: "🐼", cat: "animal" },
             { id: 39, fr: "Grenouille", es: "Rana", emoji: "🐸", cat: "animal" },
-            { id: 40, fr: "Baleine", es: "Ballena", emoji: "🐳", cat: "animal" }
+            { id: 40, fr: "Baleine", es: "Ballena", emoji: "🐳", cat: "animal" },
+            { id: 41, fr: "Père", es: "Padre", emoji: "👨", cat: "famille" },
+            { id: 42, fr: "Mère", es: "Madre", emoji: "👩", cat: "famille" },
+            { id: 43, fr: "Frère", es: "Hermano", emoji: "👦", cat: "famille" },
+            { id: 44, fr: "Sœur", es: "Hermana", emoji: "👧", cat: "famille" },
+            { id: 45, fr: "Grand-père", es: "Abuelo", emoji: "👴", cat: "famille" },
+            { id: 46, fr: "Grand-mère", es: "Abuela", emoji: "👵", cat: "famille" },
+            { id: 47, fr: "Oncle", es: "Tío", emoji: "🧔", cat: "famille" },
+            { id: 48, fr: "Tante", es: "Tía", emoji: "👩", cat: "famille" },
+            { id: 49, fr: "Cousin", es: "Primo", emoji: "🧒", cat: "famille" },
+            { id: 50, fr: "Cousine", es: "Prima", emoji: "👧", cat: "famille" },
+            { id: 51, fr: "Fils", es: "Hijo", emoji: "👦", cat: "famille" },
+            { id: 52, fr: "Fille", es: "Hija", emoji: "👧", cat: "famille" },
+            { id: 53, fr: "Parents", es: "Padres", emoji: "👪", cat: "famille" },
+            { id: 54, fr: "Bébé", es: "Bebé", emoji: "👶", cat: "famille" },
+            { id: 55, fr: "Famille", es: "Familia", emoji: "👪", cat: "famille" }
         ];
 
         let stars = 0;
+        let selectedCategories = new Set(['forme', 'animal', 'famille']);
+        const categoryLabels = {
+            forme: { name: 'Formas', emoji: '🔷' },
+            animal: { name: 'Animales', emoji: '🐾' },
+            famille: { name: 'Familia', emoji: '👪' }
+        };
         let gameSession = {
             currentRound: 0,
             maxRounds: 5,
@@ -127,6 +148,35 @@
         };
 
         // --- UTILS ---
+        function getActiveVocabulary() {
+            const active = vocabulary.filter(item => selectedCategories.has(item.cat));
+            return active.length ? active : vocabulary;
+        }
+
+        function getCategoryOptionsHtml() {
+            return Object.entries(categoryLabels).map(([cat, data]) => `
+                <label class="flex items-center gap-3 bg-white border-2 ${selectedCategories.has(cat) ? 'border-blue-300' : 'border-gray-100'} rounded-2xl px-4 py-3 cursor-pointer hover:bg-blue-50 transition-all">
+                    <input type="checkbox" class="w-5 h-5 accent-blue-500" ${selectedCategories.has(cat) ? 'checked' : ''} onchange="toggleCategory('${cat}', this.checked)">
+                    <span class="text-2xl">${data.emoji}</span>
+                    <span class="font-bold text-gray-700">${data.name}</span>
+                </label>
+            `).join('');
+        }
+
+        function toggleCategory(cat, checked) {
+            if (checked) selectedCategories.add(cat);
+            else selectedCategories.delete(cat);
+            if (selectedCategories.size === 0) selectedCategories.add(cat);
+            showMenu();
+        }
+
+        function requireWords(minCount, callback) {
+            const count = getActiveVocabulary().length;
+            if (count >= minCount) return true;
+            showFeedback(false, "Faltan palabras", `Selecciona al menos una categoría con ${minCount} palabras o combina varias. Ahora hay ${count}.`, "📚", callback || showMenu);
+            return false;
+        }
+
         function speak(text) {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'fr-FR';
@@ -228,7 +278,21 @@
         function showMenu() {
             const container = document.getElementById('game-container');
             container.innerHTML = `
-                <h2 class="text-2xl font-bold text-center mb-6 text-gray-700 font-fredoka">Elige un Juego</h2>
+                <h2 class="text-2xl font-bold text-center mb-4 text-gray-700 font-fredoka">Elige palabras y juego</h2>
+                <section class="mb-6 bg-blue-50 rounded-3xl p-4 border-2 border-blue-100">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <div>
+                            <h3 class="font-bold text-blue-700">Palabras para practicar</h3>
+                            <p class="text-sm text-blue-500">Puedes combinar varias categorías o jugar solo con una.</p>
+                        </div>
+                        <div class="text-sm font-bold text-blue-700 bg-white rounded-full px-3 py-1">
+                            ${getActiveVocabulary().length} palabras
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        ${getCategoryOptionsHtml()}
+                    </div>
+                </section>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button onclick="startMemory()" class="p-4 bg-orange-100 hover:bg-orange-200 rounded-2xl text-left flex items-center gap-4 transition-all hover:scale-[1.01]">
                         <span class="text-3xl">🧠</span>
@@ -279,7 +343,9 @@
         // --- GAME 1: MEMORY ---
         function startMemory() {
             const container = document.getElementById('game-container');
-            const items = shuffle([...vocabulary]).slice(0, 6);
+            if (!requireWords(6)) return;
+            const activeVocabulary = getActiveVocabulary();
+            const items = shuffle([...activeVocabulary]).slice(0, 6);
             const cards = shuffle([...items.map(i => ({...i, type: 'emoji'})), ...items.map(i => ({...i, type: 'word'}))]);
             let html = `<div class="flex justify-between items-center mb-4"><h3 class="font-bold text-xl text-orange-600">Memory Bilingüe</h3><button onclick="showMenu()" class="text-sm bg-gray-100 px-2 py-1 rounded">Cerrar</button></div><div class="grid grid-cols-4 gap-3">`;
             cards.forEach((card, index) => {
@@ -311,7 +377,9 @@
         // --- GAME 2: ¿QUÉ FALTA? ---
         function renderWhatIsMissing() {
             const container = document.getElementById('game-container');
-            const pool = shuffle([...vocabulary]).slice(0, 4);
+            if (!requireWords(6)) return;
+            const activeVocabulary = getActiveVocabulary();
+            const pool = shuffle([...activeVocabulary]).slice(0, 4);
             const missingIdx = Math.floor(Math.random() * 4);
             const missingItem = pool[missingIdx];
 
@@ -324,7 +392,7 @@
             `;
 
             setTimeout(() => {
-                const choices = shuffle([missingItem, ...shuffle(vocabulary.filter(v => !pool.includes(v))).slice(0, 2)]);
+                const choices = shuffle([missingItem, ...shuffle(activeVocabulary.filter(v => !pool.includes(v))).slice(0, 2)]);
                 container.innerHTML = `
                     ${renderHeader("¿Qué falta?")}
                     <p class="text-center text-lg font-bold mb-6">¿Cuál ha desaparecido?</p>
@@ -356,8 +424,10 @@
         // --- GAME 3: MATCH RÁPIDO ---
         function renderFastMatch() {
             const container = document.getElementById('game-container');
-            const target = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-            const options = shuffle([target, ...shuffle(vocabulary.filter(v => v !== target)).slice(0, 2)]);
+            if (!requireWords(3)) return;
+            const activeVocabulary = getActiveVocabulary();
+            const target = activeVocabulary[Math.floor(Math.random() * activeVocabulary.length)];
+            const options = shuffle([target, ...shuffle(activeVocabulary.filter(v => v !== target)).slice(0, 2)]);
             
             container.innerHTML = `
                 ${renderHeader("Match Rápido")}
@@ -399,11 +469,17 @@
         // --- GAME 4: EL INTRUSO ---
         function renderIntruder() {
             const container = document.getElementById('game-container');
-            const isAnimalBase = Math.random() > 0.5;
-            const baseCat = isAnimalBase ? 'animal' : 'forme';
-            const intruderCat = isAnimalBase ? 'forme' : 'animal';
+            const availableCats = [...selectedCategories].filter(cat => vocabulary.filter(v => v.cat === cat).length >= 3);
+            const otherCats = [...selectedCategories].filter(cat => vocabulary.some(v => v.cat === cat));
+            if (availableCats.length < 1 || otherCats.length < 2) {
+                showFeedback(false, "Combina categorías", "El Intruso necesita al menos dos categorías seleccionadas para poder esconder una palabra que no encaja.", "🚫", showMenu);
+                return;
+            }
+            const baseCat = shuffle(availableCats)[0];
+            const intruderCat = shuffle(otherCats.filter(cat => cat !== baseCat))[0];
             const group = shuffle(vocabulary.filter(v => v.cat === baseCat)).slice(0, 3);
-            const intruder = vocabulary.filter(v => v.cat === intruderCat)[Math.floor(Math.random() * vocabulary.filter(v => v.cat === intruderCat).length)];
+            const intruderPool = vocabulary.filter(v => v.cat === intruderCat);
+            const intruder = intruderPool[Math.floor(Math.random() * intruderPool.length)];
             const allItems = shuffle([...group, intruder]);
 
             container.innerHTML = `
@@ -433,12 +509,14 @@
         // --- GAME 5: CARRERA ---
         function startRace() {
             gameSession = { currentRound: 0, maxRounds: 5, correctCount: 0, type: 'race' };
-            const racePool = shuffle([...vocabulary]).slice(0, 5);
+            if (!requireWords(5)) return;
+            const activeVocabulary = getActiveVocabulary();
+            const racePool = shuffle([...activeVocabulary]).slice(0, 5);
             
             const renderRaceStep = () => {
                 const container = document.getElementById('game-container');
                 const target = racePool[gameSession.currentRound];
-                const options = shuffle([target, ...shuffle(vocabulary.filter(v => v !== target)).slice(0, 2)]);
+                const options = shuffle([target, ...shuffle(activeVocabulary.filter(v => v !== target)).slice(0, 2)]);
 
                 container.innerHTML = `
                     <div class="flex justify-between items-center mb-4">
