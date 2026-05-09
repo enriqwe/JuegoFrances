@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apprends le Français ! 🇫🇷</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
@@ -38,6 +39,12 @@
         .card-back {
             transform: rotateY(180deg);
             background-color: white;
+        }
+        img.emoji {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.1em;
         }
         .bounce-in {
             animation: bounceIn 0.5s cubic-bezier(0.36, 0, 0.66, -0.56) 0s 1 normal none;
@@ -164,6 +171,15 @@
         };
 
         // --- UTILS ---
+        function renderEmojiIcons(root = document.body) {
+            if (!window.twemoji) return;
+            twemoji.parse(root, {
+                folder: 'svg',
+                ext: '.svg',
+                base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'
+            });
+        }
+
         function getActiveVocabulary() {
             const active = vocabulary.filter(item => selectedCategories.has(item.cat));
             return active.length ? active : vocabulary;
@@ -238,6 +254,7 @@
 
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
+            renderEmojiIcons(overlay);
             setTimeout(() => content.classList.add('scale-100'), 10);
         }
 
@@ -578,8 +595,12 @@
             renderRaceStep();
         }
 
+        const iconObserver = new MutationObserver(() => renderEmojiIcons());
+
         window.onload = () => {
             showMenu();
+            iconObserver.observe(document.body, { childList: true, subtree: true });
+            renderEmojiIcons();
             window.speechSynthesis.getVoices();
         };
 
