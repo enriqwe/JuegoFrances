@@ -152,16 +152,32 @@
             { id: 67, fr: "Hélicoptère", es: "Helicóptero", emoji: "🚁", cat: "transport" },
             { id: 68, fr: "Ambulance", es: "Ambulancia", emoji: "🚑", cat: "transport" },
             { id: 69, fr: "Fusée", es: "Cohete", emoji: "🚀", cat: "transport" },
-            { id: 70, fr: "Trottinette", es: "Patinete", emoji: "🛴", cat: "transport" }
+            { id: 70, fr: "Trottinette", es: "Patinete", emoji: "🛴", cat: "transport" },
+            { id: 71, fr: "T-shirt", es: "Camiseta", emoji: "👕", cat: "vetements" },
+            { id: 72, fr: "Pantalon", es: "Pantalón", emoji: "👖", cat: "vetements" },
+            { id: 73, fr: "Robe", es: "Vestido", emoji: "👗", cat: "vetements" },
+            { id: 74, fr: "Jupe", es: "Falda", emoji: "👗", cat: "vetements" },
+            { id: 75, fr: "Chemise", es: "Camisa", emoji: "👔", cat: "vetements" },
+            { id: 76, fr: "Pull", es: "Jersey", emoji: "🧥", cat: "vetements" },
+            { id: 77, fr: "Manteau", es: "Abrigo", emoji: "🧥", cat: "vetements" },
+            { id: 78, fr: "Chaussures", es: "Zapatos", emoji: "👟", cat: "vetements" },
+            { id: 79, fr: "Chaussettes", es: "Calcetines", emoji: "🧦", cat: "vetements" },
+            { id: 80, fr: "Chapeau", es: "Sombrero", emoji: "👒", cat: "vetements" },
+            { id: 81, fr: "Bonnet", es: "Gorro", emoji: "🧢", cat: "vetements" },
+            { id: 82, fr: "Écharpe", es: "Bufanda", emoji: "🧣", cat: "vetements" },
+            { id: 83, fr: "Gants", es: "Guantes", emoji: "🧤", cat: "vetements" },
+            { id: 84, fr: "Pyjama", es: "Pijama", emoji: "🛌", cat: "vetements" },
+            { id: 85, fr: "Maillot de bain", es: "Bañador", emoji: "🩱", cat: "vetements" }
         ];
 
         let stars = 0;
-        let selectedCategories = new Set(['forme', 'animal', 'famille', 'transport']);
+        let selectedCategories = new Set(['forme', 'animal', 'famille', 'transport', 'vetements']);
         const categoryLabels = {
             forme: { name: 'Formas', emoji: '🔷' },
             animal: { name: 'Animales', emoji: '🐾' },
             famille: { name: 'Familia', emoji: '👪' },
-            transport: { name: 'Transportes', emoji: '🚗' }
+            transport: { name: 'Transportes', emoji: '🚗' },
+            vetements: { name: 'Ropa', emoji: '👕' }
         };
         let gameSession = {
             currentRound: 0,
