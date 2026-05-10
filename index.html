@@ -172,6 +172,8 @@
 
         let stars = 0;
         let selectedCategories = new Set(['forme', 'animal', 'famille', 'transport', 'vetements']);
+        let selectedMemoryPairs = 6;
+        const memoryPairOptions = [4, 6, 8, 10, 12, 15];
         const categoryLabels = {
             forme: { name: 'Formas', emoji: '🔷' },
             animal: { name: 'Animales', emoji: '🐾' },
@@ -215,7 +217,22 @@
             if (checked) selectedCategories.add(cat);
             else selectedCategories.delete(cat);
             if (selectedCategories.size === 0) selectedCategories.add(cat);
+            if (selectedMemoryPairs > getActiveVocabulary().length) selectedMemoryPairs = Math.max(4, Math.min(getActiveVocabulary().length, selectedMemoryPairs));
             showMenu();
+        }
+
+        function setMemoryCardCount(totalCards) {
+            selectedMemoryPairs = Math.max(2, Math.floor(totalCards / 2));
+            showMenu();
+        }
+
+        function getMemoryCardCountOptionsHtml() {
+            const activeCount = getActiveVocabulary().length;
+            return memoryPairOptions.map(pairCount => {
+                const totalCards = pairCount * 2;
+                const disabled = pairCount > activeCount;
+                return `<option value="${totalCards}" ${selectedMemoryPairs === pairCount ? 'selected' : ''} ${disabled ? 'disabled' : ''}>${totalCards} tarjetas (${pairCount} parejas)</option>`;
+            }).join('');
         }
 
         function requireWords(minCount, callback) {
@@ -342,12 +359,21 @@
                         ${getCategoryOptionsHtml()}
                     </div>
                 </section>
+                <section class="mb-6 bg-orange-50 rounded-3xl p-4 border-2 border-orange-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                        <h3 class="font-bold text-orange-700">Tamaño del Memory Bilingüe</h3>
+                        <p class="text-sm text-orange-500">Elige cuántas tarjetas quieres en el tablero.</p>
+                    </div>
+                    <select onchange="setMemoryCardCount(Number(this.value))" class="bg-white border-2 border-orange-200 rounded-2xl px-4 py-3 font-bold text-orange-800">
+                        ${getMemoryCardCountOptionsHtml()}
+                    </select>
+                </section>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button onclick="startMemory()" class="p-4 bg-orange-100 hover:bg-orange-200 rounded-2xl text-left flex items-center gap-4 transition-all hover:scale-[1.01]">
                         <span class="text-3xl">🧠</span>
                         <div>
                             <p class="font-bold text-orange-800">1. Memory Bilingüe</p>
-                            <p class="text-sm text-orange-600">Encuentra parejas de palabras y emojis.</p>
+                            <p class="text-sm text-orange-600">Encuentra parejas de palabras y emojis (${selectedMemoryPairs * 2} tarjetas).</p>
                         </div>
                     </button>
                     <button onclick="initSession('missing')" class="p-4 bg-blue-100 hover:bg-blue-200 rounded-2xl text-left flex items-center gap-4 transition-all hover:scale-[1.01]">
@@ -392,11 +418,13 @@
         // --- GAME 1: MEMORY ---
         function startMemory() {
             const container = document.getElementById('game-container');
-            if (!requireWords(6)) return;
             const activeVocabulary = getActiveVocabulary();
-            const items = shuffle([...activeVocabulary]).slice(0, 6);
+            const pairCount = Math.min(selectedMemoryPairs, activeVocabulary.length);
+            if (!requireWords(pairCount)) return;
+            const items = shuffle([...activeVocabulary]).slice(0, pairCount);
             const cards = shuffle([...items.map(i => ({...i, type: 'emoji'})), ...items.map(i => ({...i, type: 'word'}))]);
-            let html = `<div class="flex justify-between items-center mb-4"><h3 class="font-bold text-xl text-orange-600">Memory Bilingüe</h3><button onclick="showMenu()" class="text-sm bg-gray-100 px-2 py-1 rounded">Cerrar</button></div><div class="grid grid-cols-4 gap-3">`;
+            const gridCols = cards.length <= 20 ? 4 : 5;
+            let html = `<div class="flex justify-between items-center mb-4"><div><h3 class="font-bold text-xl text-orange-600">Memory Bilingüe</h3><p class="text-sm text-orange-500">${cards.length} tarjetas · ${items.length} parejas</p></div><button onclick="showMenu()" class="text-sm bg-gray-100 px-2 py-1 rounded">Cerrar</button></div><div class="grid gap-3" style="grid-template-columns: repeat(${gridCols}, minmax(0, 1fr));">`;
             cards.forEach((card, index) => {
                 // Aumentado el tamaño de texto de [10px] a text-base y añadido px-1 para palabras largas
                 html += `<div id="card-${index}" class="card h-24" onclick="handleMemoryClick(${index}, ${card.id}, '${card.type}', '${card.fr}')"><div class="card-inner w-full h-full"><div class="card-front bg-orange-400 text-white text-2xl font-bold">?</div><div class="card-back text-center p-1 border-2 border-orange-400 font-bold text-base leading-tight flex items-center justify-center overflow-hidden break-words px-1">${card.type === 'emoji' ? `<span class="text-3xl">${card.emoji}</span>` : card.fr}</div></div></div>`;
